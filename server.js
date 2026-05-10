@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 // Importa Express para crear la aplicación web
 import express from "express";
 
@@ -18,7 +20,7 @@ const app = express();
 
 // Configura las opciones de CORS para permitir acceso desde el frontend
 const corsOptions = {
-  origin: "http://localhost:5173",
+  origin: process.env.FRONTEND_URL || "http://localhost:5173",
 };
 
 // Aplica el middleware de CORS a la aplicación
@@ -30,8 +32,14 @@ app.use(express.json());
 // Middleware para analizar solicitudes con cuerpo en formato URL-encoded (formularios)
 app.use(express.urlencoded({ extended: true }));
 
-// Ruta simple para probar que el servidor está funcionando
-app.get("/", (req, res) => {
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Ruta simple para probar que la API está funcionando
+app.get("/api", (req, res) => {
   res.json({ message: "Welcome to the Node.js JWT Authentication API." });
 });
 
@@ -40,6 +48,14 @@ app.use("/api/auth", authRoutes);
 
 // Define la ruta base para pruebas de acceso según el rol del usuario: /api/test/*
 app.use("/api/test", userRoutes);
+
+// Servir archivos estáticos del frontend de Vite
+app.use(express.static(path.join(__dirname, 'frontend/dist')));
+
+// Cualquier ruta que no sea /api será manejada por el frontend (React Router)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'frontend/dist/index.html'));
+});
 
 // Define el puerto en el que se ejecutará el servidor. Usa 3000 por defecto si no hay una variable de entorno
 const PORT = process.env.PORT || 3000;

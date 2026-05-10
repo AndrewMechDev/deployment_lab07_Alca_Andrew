@@ -1,11 +1,15 @@
 // app/config/db.config.js
+import 'dotenv/config';
+
 export default {
-    HOST: "localhost",
-    USER: "root",
-    PASSWORD: "devmec_a313395",
-    DB: "db",
-    PORT: 3306,
-    dialect: "mysql",
+    url: process.env.DATABASE_URL,
+    dialect: "postgres",
+    dialectOptions: {
+        ssl: {
+            require: true,
+            rejectUnauthorized: false
+        }
+    },
     pool: {
         max: 5,
         min: 0,
